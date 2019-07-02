@@ -6,13 +6,32 @@ IMPORTANT!: This uses `mergeOverwrite`. You must use a build of `helmfile` that 
 
 Its also possible by just using `merge` as well (experienced this prior to 735 as well)
 
-## Fails:
+## Fails #1:
 
 It fails most of the time w/ a panic. Once in a while it works, but just run it again and it should fail. i.e. some race condition
 
 ```
 ./helmfile --log-level debug -f helmfile.fail.yaml -e test4 apply
 ```
+
+## Fails #2:
+
+Fails most of the time w/ panic.
+
+```
+./helmfile --log-level debug -f helmfile.fails2.yaml -e test4 apply
+```
+
+This block, which has nothing to do w/ any other variables... very weird
+
+```
+...
+values:
+{{ range $f := list "values/test1/values.yaml" "values/test2/values.yaml" "values/test3/values.yaml" }}
+- {{$f}}
+{{ end }}
+```
+
 
 ## Works (example 1):
 
