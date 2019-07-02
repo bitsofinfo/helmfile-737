@@ -1,0 +1,107 @@
+values:
+  - someProp1: "default"
+    chartConfigs:
+      name: "default"
+      prop2: "default"
+      items:
+        p1: "one"
+        p2: "two"
+      appdeploy:
+        chartValues:
+          baseValuesRootDir: "."
+          baseValues:
+            - test1
+            - test2
+
+environments:
+
+
+  test4:
+    values:
+      - someProperty: "test4"
+        someProperty2: "test4prop2"
+        chartConfigs:
+          name: "test4yahoo"
+          prop2: "something"
+        environments:
+          stage:
+            contexts:
+              context1:
+                services:
+                  - name: "test4-service-1"
+                    version: 8
+                    hooks:
+                      hook1: "test"
+                    chartConfigs:
+                      name: "test4-1"
+                      items:
+                        p1: "one"
+                        p2: "\\{\\{ .service.version | replace \"--1-1\" \"\" \\}\\}"
+                      appdeploy:
+                        chartValues:
+                          baseValuesRootDir: "."
+                          baseValues:
+                            - test3
+                            - test4
+                  - name: "test4-service-2"
+                  - name: "test4-service-3"
+                    chartConfigs:
+                      name: "test4-3"
+                      prop2: "something-2"
+                  - name: "test4-service-4"
+                  - name: "test4-service-5"
+                    chartConfigs:
+                      name: "test4-5"
+                      items:
+                        p1: "one"
+                        p2: "two"
+                  - name: "test4-service-6"
+
+releases:
+
+{{- $stateVals := .Values }}
+{{- $envVals := .Environment.Values -}}
+
+{{- range $currEnvironmentName,$currEnvironment := $envVals.environments }}
+  {{- range $currContextName,$currContext := $currEnvironment.contexts }}
+    {{- range $currService := $currContext.services }}
+
+      {{ $chartConfigs := dict }}
+      {{ $chartConfigs := hasKey $stateVals "chartConfigs" | ternary (mergeOverwrite $chartConfigs ($stateVals | getOrNil "chartConfigs")) $chartConfigs }}
+      {{ $chartConfigs := hasKey $envVals "chartConfigs" | ternary (mergeOverwrite $chartConfigs ($envVals | getOrNil "chartConfigs")) $chartConfigs }}
+      {{ $chartConfigs := hasKey $currEnvironment "chartConfigs" | ternary (mergeOverwrite $chartConfigs ($currEnvironment | getOrNil "chartConfigs")) $chartConfigs }}
+      {{ $chartConfigs := hasKey $currContext "chartConfigs" | ternary (mergeOverwrite $chartConfigs ($currContext | getOrNil "chartConfigs")) $chartConfigs }}
+      {{ $chartConfigs := hasKey $currService "chartConfigs" | ternary (mergeOverwrite $chartConfigs ($currService | getOrNil "chartConfigs")) $chartConfigs }}
+
+      {{- $variablesDict := (dict "envVals" $envVals "stateVals" $stateVals "service" $currService "context" $currContext "environment" $currEnvironment) }}
+
+  - name: nginx-{{$currContextName}}-{{$currService.name}}
+    chart: stable/nginx-ingress
+    values:
+
+      {{/*
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      REMOVING THIS GETS RID OF THE PANIC
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      {{ range $valueBase := $chartConfigs.appdeploy.chartValues.baseValues }}
+      - {{$chartConfigs.appdeploy.chartValues.baseValuesRootDir}}/values/{{$valueBase}}/values.yaml
+      {{ end }}
+      */}}
+      
+      - chartConfigName: {{$currContextName}}-{{$chartConfigs.name}}
+        prop2: {{$chartConfigs.prop2}}
+        env1: {{$envVals.someProperty}}
+        state1: {{$stateVals.someProp1}}
+        {{ range $itemName,$itemVal := $chartConfigs.items }}
+          {{- $variablesDict := (dict "envVals" $envVals "stateVals" $stateVals "service" $currService "context" $currContext "environment" $currEnvironment) }}
+
+        {{$itemName}}: {{ $itemVal }}
+        {{$itemName}}2: {{ tpl $itemVal $variablesDict }}
+        {{ end }}
+        {{ if hasKey $envVals "someProperty2"}}
+        someProperty2: {{ $envVals.someProperty2 }}
+        {{ end }}
+        someProperty2Again: {{ $envVals | getOrNil "someProperty2" }}
+    {{ end }}
+  {{ end }}
+{{ end }}
