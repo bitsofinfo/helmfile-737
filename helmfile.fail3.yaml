@@ -1,0 +1,81 @@
+values:
+  - someProp1: "default"
+    chartConfigs:
+      name: "default"
+      prop2: "default"
+      items:
+        p1: "one"
+        p2: "two"
+      appdeploy:
+        chartValues:
+          baseValuesRootDir: "."
+          baseValues:
+            - test1
+            - test2
+
+environments:
+
+
+  test4:
+    values:
+      - someProperty: "test4"
+        someProperty2: "test4prop2"
+        chartConfigs:
+          name: "test4yahoo"
+          prop2: "something"
+        environments:
+          stage:
+            contexts:
+              context1:
+                services:
+                  - name: "test4-service-1"
+                    version: 8
+                    hooks:
+                      hook1: "test"
+                    chartConfigs:
+                      name: "test4-1"
+                      items:
+                        p1: "one"
+                        p2: "\\{\\{ .service.version | replace \"--1-1\" \"\" \\}\\}"
+                      appdeploy:
+                        chartValues:
+                          baseValuesRootDir: "."
+                          baseValues:
+                            - test3
+                            - test4
+                  - name: "test4-service-2"
+                  - name: "test4-service-3"
+                    chartConfigs:
+                      name: "test4-3"
+                      prop2: "something-2"
+                  - name: "test4-service-4"
+                  - name: "test4-service-5"
+                    chartConfigs:
+                      name: "test4-5"
+                      items:
+                        p1: "one"
+                        p2: "two"
+                  - name: "test4-service-6"
+
+releases:
+
+{{- $stateVals := .Values }}
+{{- $envVals := .Environment.Values -}}
+
+{{- range $currEnvironmentName,$currEnvironment := $envVals.environments }}
+  {{- range $currContextName,$currContext := $currEnvironment.contexts }}
+    {{- range $currService := $currContext.services }}
+
+  - name: nginx-{{$currContextName}}-{{$currService.name}}
+    chart: stable/nginx-ingress
+    values:
+
+      {{ range $f := list "values/test1/values.yaml" "values/test2/values.yaml" "values/test3/values.yaml" }}
+      - {{$f}}
+      {{ end }}
+
+      - chartConfigName: {{$currContextName}}-{{$currService.name}}
+
+    {{ end }}
+  {{ end }}
+{{ end }}

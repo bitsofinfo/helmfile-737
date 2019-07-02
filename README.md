@@ -8,7 +8,7 @@ Its also possible by just using `merge` as well (experienced this prior to 735 a
 
 ## Fails #1:
 
-It fails most of the time w/ a panic. Once in a while it works, but just run it again and it should fail. i.e. some race condition
+Fails w/ panic (you may have to run more than once as it fails about 90% of runs w/ panic).
 
 ```
 ./helmfile --log-level debug -f helmfile.fail.yaml -e test4 apply
@@ -16,13 +16,15 @@ It fails most of the time w/ a panic. Once in a while it works, but just run it 
 
 ## Fails #2:
 
-Fails most of the time w/ panic.
+Same as above (you may have to run more than once as it fails about 90% of runs w/ panic).
 
 ```
-./helmfile --log-level debug -f helmfile.fails2.yaml -e test4 apply
+./helmfile --log-level debug -f helmfile.fail2.yaml -e test4 apply
 ```
 
 This block, which has nothing to do w/ any other variables... very weird
+
+(you may have to run more than once as it fails about 90% of runs w/ panic).
 
 ```
 ...
@@ -30,6 +32,14 @@ values:
 {{ range $f := list "values/test1/values.yaml" "values/test2/values.yaml" "values/test3/values.yaml" }}
 - {{$f}}
 {{ end }}
+```
+
+## Fails #3:
+
+Same as above, even removes all references to `merge` and or `mergeOverwrite`
+
+```
+./helmfile --log-level debug -f helmfile.fail3.yaml -e test4 apply
 ```
 
 
