@@ -20,7 +20,7 @@ It fails most of the time w/ a panic. Once in a while it works, but just run it 
 ./helmfile --log-level debug -f helmfile.works.yaml -e test4 apply
 ```
 
-When this block is enabled the panic occurs:
+When this block is removed the panic stops:
 ```
 {{ range $valueBase := $chartConfigs.appdeploy.chartValues.baseValues }}
 - {{$chartConfigs.appdeploy.chartValues.baseValuesRootDir}}/values/{{$valueBase}}/values.yaml
