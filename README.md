@@ -27,15 +27,6 @@ When this block is enabled the panic occurs:
 {{ end }}
 ```
 
-## Works (example 2):
-
-Workaround (see file for comment)
-
-```
-./helmfile --log-level debug -f helmfile.works2.yaml -e test4 apply
-```
-
-
 ## This also works (template, but not apply)
 ```
 ./helmfile --log-level debug -f helmfile.fail.yaml -e test4 template
