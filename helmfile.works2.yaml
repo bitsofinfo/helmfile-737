@@ -80,9 +80,9 @@ releases:
       PRE building the list of values files gets rid of panic
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       */}}
-      {{ $files := list }}
+      {{ $files := dict "paths" list }}
       {{ range $valueBase := $chartConfigs.appdeploy.chartValues.baseValues }}
-        {{ $_ := append $files (printf "%s/values/%s/values.yaml" $chartConfigs.appdeploy.chartValues.baseValuesRootDir $valueBase) }}
+        {{ $_ := append $files.paths (printf "%s/values/%s/values.yaml" $chartConfigs.appdeploy.chartValues.baseValuesRootDir $valueBase) | set $files "paths" }}
       {{ end }}
 
 
@@ -95,7 +95,7 @@ releases:
       Referencing the pre-built the list of values files gets rid of panic
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       */}}
-      {{ range $f := $files }}
+      {{ range $f := $files.paths }}
       - {{$f}}
       {{ end }}
 
