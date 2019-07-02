@@ -19,6 +19,11 @@ Works:
 ./helmfile --log-level debug -f helmfile.works.yaml -e test4 apply
 ```
 
+Also works:
+```
+./helmfile --log-level debug -f helmfile.fail.yaml -e test4 template
+```
+
 When this block is enabled the panic occurs:
 ```
 {{ range $valueBase := $chartConfigs.appdeploy.chartValues.baseValues }}
